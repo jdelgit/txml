@@ -1,108 +1,68 @@
-import xml.etree.ElementTree as et
+from xml.etree.ElementTree import iterparse
 
 
-class XmlLookup:
+class XmlParser:
 
-    def __init__(self, xmldata=""):
-        if xmldata[-4:] == ".xml":
-            self.root = et.parse(xmldata).getroot()
-        elif xmldata:
-            self.tree = et.fromstring(xmldata)
-            if type(self.tree) == et.ElementTree:
-                self.root = self.tree.getroot()
-            else:
-                self.root = self.tree
-        else:
-            self.root = et.fromstring("<foo><bar></bar></foo>")
+    def __init__(self, source):
+        self.source = source
 
-    def __str__(self):
-        return self.root.tag
+    def search_node_attr(self, tag="", attr_id="",
+                         attr_val="", get_children=False):
+        for node in self.search_nodes(tag=tag, get_children=get_children):
+            if node[attr_id] == attr_val:
+                yield node
 
-    def __repr__(self):
-        return self.root.tag
-
-    def get_node_keys(self, node=""):
-
-        if node == "":
-            node = self.root
-        if type(node) == et.Element:
-            return node.keys()
-        else:
-            print("Incorrect type {} for 'node'".format(type(node)))
-            return []
-
-    def get_node_attr(self, node="", attr=""):
-
-        if node == "":
-            node = self.root
-        if type(node) == et.Element:
-            return node.attrib.get(attr)
-        else:
-            print("Incorrect type {} for 'node'".format(type(node)))
-            return ""
-
-    def filter_nodes(self, node="", tag="",
-                     attr_id="", attr_val=""):
-
-            tagged_nodes = self.get_nodes(node=node, tag=tag)
-            filtered_nodes = self.filter_nodes_attr(nodes=tagged_nodes,
-                                                    attr_id=attr_id,
-                                                    attr_val=attr_val)
-            return filtered_nodes
-
-    def get_nodes(self, node="", tag=""):
-
-        if node == "":
-            node = self.root
-        if type(node) == et.Element:
+    def search_nodes(self, tag="", get_children=False):
+        context = iterparse(self.source, events=('start', 'end'))
+        if get_children:
+            children = []
+            # children_tree = []
+        append_children = False
+        for event, elem in context:
             if tag:
-                matching_nodes = node.iter(tag)
-                return matching_nodes
+                if get_children:
+                    if append_children:
+                        # if elem.tag != tag and event == 'start':
+                            # children_tree.append((elem.tag, event))
+
+                        if elem.tag != tag and event == 'end':
+                            # children_tree.append((elem.tag, event))
+                            node_dict = self._node_to_dict(elem)
+                            elem.clear()
+                            children.append(node_dict)
+                    if elem.tag == tag and event == 'start':
+                        append_children = True
+
+                if elem.tag == tag and event == 'end':
+
+                    node_dict = self._node_to_dict(elem)
+                    elem.clear()
+
+                    if get_children:
+                        node_dict['children'] = children
+                        # node_dict['children_tree'] = children_tree
+                        children = []
+                        # children_tree = []
+                        append_children = False
+
+                    yield node_dict
             else:
-                print("No tag given ")
-        else:
-            print("Incorrect type {} for 'node'".format(type(node)))
-            return ""
+                node_dict = self._node_to_dict(elem)
+                elem.clear()
 
-    def filter_nodes_attr(self, nodes=[], attr_id="", attr_val=""):
+                yield node_dict
+        del context
 
-        for sub_node in nodes:
-            if attr_id:
-                node_attr_val = sub_node.attrib.get(attr_id)
-                if node_attr_val == attr_val:
-                    yield self.node_to_dict(sub_node)
-            else:
-                yield self.node_to_dict(sub_node)
-
-    def node_to_dict(self, node=""):
-
-        if node == "":
-            node = self.root
+    def _node_to_dict(self, node=""):
         data = {n[0]: n[1] for n in node.items()}
         data['text'] = node.text
-        data['children'] = node.getiterator()
         data['tag'] = node.tag
         return data
 
 
-test = XmlLookup(xmldata="<file path=\"export/level4/NL/30114.xml\" Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"ICECAT\" Supplier_id=\"5\" Prod_ID=\"VCT-R640\" Catid=\"587\" On_Market=\"1\" Model_Name=\"Lightweight Tripod VCT-R640\" Product_View=\"32767\" HighPic=\"http://images.icecat.biz/img/norm/high/30114-Sony.jpg\" HighPicSize=\"20782\" HighPicWidth=\"320\" HighPicHeight=\"300\" Date_Added=\"20050715000000\">\
-      <M_Prod_ID>ACLS5<b>test</b>.CEE</M_Prod_ID>\
-      <EAN_UPCS>\
-        <EAN_UPC Value=\"4901780776467\" />\
-        <EAN_UPC Value=\"5053460903188\" />\
-      </EAN_UPCS>\
-      <Country_Markets>\
-        <Country_Market Value=\"PL\" />\
-        <Country_Market Value=\"IT\" />\
-        <Country_Market Value=\"DE\" />\
-        <Country_Market Value=\"GB\" />\
-        <Country_Market Value=\"US\" />\
-        <Country_Market Value=\"ES\" />\
-        <Country_Market Value=\"NL\" />\
-        <Country_Market Value=\"FR\" />\
-        <Country_Market Value=\"ZA\" />\
-      </Country_Markets>\
-      <TryCData>\
-        <![CDATA[cdata text & > hoi]]>\
-      </TryCData>\
-    </file>")
+source = 'test_productindex.xml'
+xm = XmlParser(source)
+files = xm.search_nodes(tag='file', get_children=True)
+match = xm.search_node_attr(tag='file', attr_id='Catid', attr_val='587', get_children=True)
+m = list(match)
+
