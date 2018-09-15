@@ -122,7 +122,7 @@ Clone this repo
 
 ## Links
 ***
-+ [Github]  (https://github.com/jdelgit/txml)
++ [Github](https://github.com/jdelgit/txml)
 
 
 ## To Do
