@@ -5,10 +5,10 @@
 ## Usage
 This module currently only supports a '.xml' file as input
 
-'''python
->>> from my_xml import XmlParser
+```python
+from my_xml import XmlParser
 
->>> parser = XmlParser()
+parser = XmlParser()
 element = "<file path=\"export/level4/NL/30114.xml\" \
         Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
         Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
@@ -33,10 +33,10 @@ element = "<file path=\"export/level4/NL/30114.xml\" \
 
 >>> type(element) = et.etree.(c)ElementTree.Element
 >>> result = parser._node_to_dict(element)
-'''
+```
 All the attributes are of the element are return, the child elements are ignored
 
-'''python
+```python
 >>> result
 
 {'path': 'export/level4/NL/30114.xml',
@@ -52,32 +52,32 @@ All the attributes are of the element are return, the child elements are ignored
 'text': '\n      ',
 'tag': "gile"}
 
-'''
+```
 
 Reading  and searching throug an .xml file
 Using 'sample.xml'
 
-'''python
->>> from my_xml import XmlParser
->>> source = sample.xml
->>> parser = XmlParser(source=source)
->>> products = parser.search_nodes(tag='controller')
-'''
+```python
+from my_xml import XmlParser
+source = sample.xml
+parser = XmlParser(source=source)
+products = parser.search_nodes(tag='controller')
+```
 
 The 'products' object is a generator of all matched instances of the tag 'controller'.
 The results can only be accessed once. If the results require multiple accesses
 then the generator can be converted to a list.
 
-'''python
+```python
 
->>> product_list = list(product)
->>> len(product_list)
+product_list = list(product)
+len(product_list)
 2
-'''
+```
 
 Let's look at the first entry
-'''python
->>> product_list[0]
+```python
+product_list[0]
 {'elem': {'type': 'usb', 'index': '0',
           'text': '\n            ',
           'tag': 'controller'}
@@ -90,15 +90,15 @@ Let's look at the first entry
                          'function': '0x2',
                          'text': None, 'tag': 'address'}}] }
 
-'''
+```
 
 The txml module can also search for node which match a set of attributes.
-'''python
->>> product = parser.search_node_attr(tag='controller', type='usb')
->>> len(list(product))
+```python
+product = parser.search_node_attr(tag='controller', type='usb')
+len(list(product))
 1
 
->>> product
+product
 {'elem': {'type': 'usb', 'index': '0',
           'text': '\n            ',
           'tag': 'controller'}
@@ -111,7 +111,7 @@ The txml module can also search for node which match a set of attributes.
                          'function': '0x2',
                          'text': None, 'tag': 'address'}}] }
 
-'''
+```
 ## Installation
 Clone this repo
 
@@ -123,7 +123,7 @@ Clone this repo
 
 
 ## To Do
-*Check unit tests
-*Finish README
-*Performance tests
-*Support for string input formats
+..*Check unit tests
+..*Finish README
+..*Performance tests
+..*Support for string input formats
