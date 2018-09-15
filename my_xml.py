@@ -1,4 +1,5 @@
 from xml.etree.ElementTree import iterparse
+# Doesn't support string inputs yet, only .xml files
 
 
 class XmlParser:
@@ -6,13 +7,35 @@ class XmlParser:
     def __init__(self, source):
         self.source = source
 
-    def search_node_attr(self, tag="", attr_id="",
-                         attr_val="", get_children=False):
+    def search_node_attr(self, tag="", get_children=True, **kwargs):
+        if 'kwargs' in kwargs:
+            kwargs = kwargs['kwargs']
         for node in self.search_nodes(tag=tag, get_children=get_children):
-            if node[attr_id] == attr_val:
+            if len(kwargs) > 0:
+                for key in kwargs:
+                    arg = kwargs[key]
+
+                    try:
+                        node_val = node[key]
+                    except KeyError:
+                        print("Key '{}' not found in element {}".format(key,
+                                                                        tag))
+                        return {}
+
+                    if node_val == arg:
+                        give_node = True
+                    else:
+                        # attribute not matching
+                        # move on to next node
+                        give_node = False
+                        break
+            else:
+                give_node = True
+            # if node[attr_id] == attr_val:
+            if give_node:
                 yield node
 
-    def search_nodes(self, tag="", get_children=False):
+    def search_nodes(self, tag="", get_children=True):
         context = iterparse(self.source, events=('start', 'end'))
         if get_children:
             children = []
