@@ -1,5 +1,2 @@
-*.xml
-README
-README.*
 guidance*
-__pycache__/
+*/

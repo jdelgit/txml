@@ -4,7 +4,7 @@ from xml.etree.ElementTree import iterparse
 
 class XmlParser:
 
-    def __init__(self, source):
+    def __init__(self, source=""):
         self.source = source
 
     def search_node_attr(self, tag="", get_children=True, **kwargs):
@@ -36,7 +36,11 @@ class XmlParser:
                 yield node
 
     def search_nodes(self, tag="", get_children=True):
-        context = iterparse(self.source, events=('start', 'end'))
+        if self.source:
+            context = iterparse(self.source, events=('start', 'end'))
+        else:
+            print("No source XML-file provided")
+            return
         if get_children:
             children = []
             p_stack = []
@@ -69,14 +73,15 @@ class XmlParser:
             if elem.tag == tag and event == 'end':
 
                 node_dict = self._node_to_dict(elem)
+                output_dict = {'elem': node_dict, 'children': []}
                 elem.clear()
 
                 if get_children:
-                    node_dict['children'] = children
+                    output_dict['children'] = children
                     children = []
                     append_children = False
 
-                yield node_dict
+                yield output_dict
 
         del context
 
