@@ -1,8 +1,8 @@
 # txml
-
 'txml' is a module to parse XML files to a dictionary-like object
 
 ## Usage
+***
 This module currently only supports a '.xml' file as input
 
 ```python
@@ -38,7 +38,6 @@ All the attributes are of the element are return, the child elements are ignored
 
 ```python
 >>> result
-
 {'path': 'export/level4/NL/30114.xml',
 'Product_ID': '30114', 'Updated': '20150301102709',
 'Quality': 'AWESOME', 'Supplier_id': '5',
@@ -58,26 +57,27 @@ Reading  and searching throug an .xml file
 Using 'sample.xml'
 
 ```python
-from my_xml import XmlParser
-source = sample.xml
-parser = XmlParser(source=source)
-products = parser.search_nodes(tag='controller')
+>>> from my_xml import XmlParser
+>>> source = sample.xml
+>>> parser = XmlParser(source=source)
+>>> products = parser.search_nodes(tag='controller')
 ```
 
 The 'products' object is a generator of all matched instances of the tag 'controller'.
 The results can only be accessed once. If the results require multiple accesses
 then the generator can be converted to a list.
 
-```python
 
-product_list = list(product)
-len(product_list)
+```python
+>>> product_list = list(product)
+>>> len(product_list)
 2
 ```
 
 Let's look at the first entry
+
 ```python
-product_list[0]
+>>> product_list[0]
 {'elem': {'type': 'usb', 'index': '0',
           'text': '\n            ',
           'tag': 'controller'}
@@ -89,16 +89,15 @@ product_list[0]
                          'bus': '0x00', 'slot': '0x01',
                          'function': '0x2',
                          'text': None, 'tag': 'address'}}] }
-
 ```
 
 The txml module can also search for node which match a set of attributes.
-```python
-product = parser.search_node_attr(tag='controller', type='usb')
-len(list(product))
-1
 
-product
+```python
+>>> product = parser.search_node_attr(tag='controller', type='usb')
+>>> len(list(product))
+1
+>>> product
 {'elem': {'type': 'usb', 'index': '0',
           'text': '\n            ',
           'tag': 'controller'}
@@ -110,20 +109,25 @@ product
                          'bus': '0x00', 'slot': '0x01',
                          'function': '0x2',
                          'text': None, 'tag': 'address'}}] }
-
 ```
+
+
 ## Installation
+***
 Clone this repo
 
 ## License
+***
 'txml' is released under the terms of the [MIT license](http://opensource.org/licenses/MIT)
 
 ## Links
-* [Github]  (https://github.com/jdelgit/txml)
+***
++ [Github]  (https://github.com/jdelgit/txml)
 
 
 ## To Do
-..*Check unit tests
-..*Finish README
-..*Performance tests
-..*Support for string input formats
+***
++ Check unit tests
++ Finish README
++ Performance tests
++ Support for string input formats
