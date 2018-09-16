@@ -1,4 +1,5 @@
 # txml
+
 'txml' is a module to parse XML files to a dictionary-like object
 
 ## Usage
@@ -126,5 +127,6 @@ Clone this repo
 
 
 ## To Do
+
 + Performance tests
 + Support for string input formats
