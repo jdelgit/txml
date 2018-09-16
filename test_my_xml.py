@@ -1,5 +1,5 @@
 from my_xml import XmlParser
-from xml.etree.ElementTree import parse
+from xml.etree.ElementTree import fromstring
 import unittest
 
 
@@ -36,7 +36,7 @@ class TestXmlParser(unittest.TestCase):
         </TryCData>\
         </file>"
 
-        test_node = parse(source=node2dict_testdata)
+        test_node = fromstring(node2dict_testdata)
         my_parser = XmlParser()
         if hasattr(test_node, 'getroot'):
             test_node = test_node.getroot()
@@ -51,8 +51,8 @@ class TestXmlParser(unittest.TestCase):
                         'HighPic': 'http://images.awesome.biz/img/high/30114-Mibatsu.jpg',
                         'HighPicSize': '20782', 'HighPicWidth': '320',
                         'HighPicHeight': '300', 'Date_Added': '20050715000000',
-                        'text': '\n      ',
-                        'tag': "gile"}
+                        'text': '        ',
+                        'tag': "file"}
         self.assertDictEqual(test_dict, control_dict)
 
     def test_search_nodes(self):
@@ -60,7 +60,7 @@ class TestXmlParser(unittest.TestCase):
         products_list = list(products)
 
         test_num_matches = len(products_list)
-        control_num_matches = 2
+        control_num_matches = 3
         self.assertEqual(test_num_matches, control_num_matches)
 
         test_product = products_list[0]['elem']
@@ -91,22 +91,27 @@ class TestXmlParser(unittest.TestCase):
         control_matches = 1
         self.assertEqual(test_matches, control_matches)
 
-        test_product = prod_list[0]['elem']
-        control_product = {'type': 'usb', 'index': '0',
-                           'text': '\n            ', 'tag': 'controller',
-                           'children': [{'children': [],
-                                         'elem': {'name': 'usb0',
-                                                  'text': None,
-                                                  'tag': 'alias'}},
-                                        {'children': [],
-                                         'elem': {'type': 'pci',
-                                                  'domain': '0x0000',
-                                                  'bus': '0x00',
-                                                  'slot': '0x01',
-                                                  'function': '0x2',
-                                                  'text': None,
-                                                  'tag': 'address'}}]}
-        self.assertEqual(test_product, control_product)
+        test_product_elem = prod_list[0]['elem']
+        control_product_elem = {'type': 'usb', 'index': '0',
+                                'text': '\n            ',
+                                'tag': 'controller'}
+        self.assertEqual(test_product_elem, control_product_elem)
+
+        test_product_children = prod_list[0]['children']
+        control_product_children = [{'children': [],
+                                     'elem': {'name': 'usb0',
+                                              'text': None,
+                                              'tag': 'alias'}},
+                                    {'children': [],
+                                     'elem': {'type': 'pci',
+                                              'domain': '0x0000',
+                                              'bus': '0x00',
+                                              'slot': '0x01',
+                                              'function': '0x2',
+                                              'text': None,
+                                              'tag': 'address'}}]
+        self.assertEqual(test_product_children, control_product_children)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -2,7 +2,7 @@
 'txml' is a module to parse XML files to a dictionary-like object
 
 ## Usage
-***
+
 This module currently only supports a '.xml' file as input
 
 ```python
@@ -113,21 +113,18 @@ The txml module can also search for node which match a set of attributes.
 
 
 ## Installation
-***
+
 Clone this repo
 
 ## License
-***
+
 'txml' is released under the terms of the [MIT license](http://opensource.org/licenses/MIT)
 
 ## Links
-***
-+ [Github]  (https://github.com/jdelgit/txml)
+
++ [Github](https://github.com/jdelgit/txml)
 
 
 ## To Do
-***
-+ Check unit tests
-+ Finish README
 + Performance tests
 + Support for string input formats

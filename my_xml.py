@@ -16,7 +16,7 @@ class XmlParser:
                     arg = kwargs[key]
 
                     try:
-                        node_val = node[key]
+                        node_val = node['elem'][key]
                     except KeyError:
                         print("Key '{}' not found in element {}".format(key,
                                                                         tag))
@@ -31,7 +31,6 @@ class XmlParser:
                         break
             else:
                 give_node = True
-            # if node[attr_id] == attr_val:
             if give_node:
                 yield node
 
@@ -58,7 +57,7 @@ class XmlParser:
                 if elem.tag != tag and append_children:
                     event, elem, p_tag, c_tag, p_stack, \
                         tag_stack, children, npd = \
-                        self._xml_children_handler(event=event,
+                        self._stack_state_controller(event=event,
                                                    elem=elem,
                                                    p_tag=p_tag,
                                                    c_tag=c_tag,
@@ -85,9 +84,9 @@ class XmlParser:
 
         del context
 
-    def _xml_children_handler(self, event, elem, p_tag="", c_tag="",
-                              p_stack=[], tag_stack=[], children=[],
-                              npd=False):
+    def _stack_state_controller(self, event, elem, p_tag="", c_tag="",
+                                p_stack=[], tag_stack=[], children=[],
+                                npd=False):
         # ndp controls the creation of new dicts in the p_stack
         if (elem.tag != c_tag) and (event == "start"):
             tag_stack.append(elem.tag)
