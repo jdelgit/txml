@@ -266,36 +266,3 @@ class XmlParser:
         data['text'] = node.text
         data['tag'] = node.tag
         return data
-
-source = "<file path=\"export/level4/NL/30114.xml\" \
-        Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
-        Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
-        Model_Name=\"Mibatsu Monstrosity\" Product_View=\"32767\" \
-        HighPic=\"http://images.awesome.biz/img/high/30114-Mibatsu.jpg\" \
-        HighPicSize=\"20782\" HighPicWidth=\"320\" HighPicHeight=\"300\" \
-        Date_Added=\"20050715000000\">\
-        <M_Prod_ID>ACLS5<b>test</b>.CEE</M_Prod_ID>\
-        <EAN_UPCS>\
-        <EAN_UPC Value=\"4901780776467\" />\
-        <EAN_UPC Value=\"5053460903188\" />\
-        </EAN_UPCS>\
-        <Country_Markets>\
-        <Country_Market Value=\"PL\" />\
-        <Country_Market Value=\"ES\" />\
-        <Country_Market Value=\"NL\" />\
-        <Country_Market Value=\"FR\" />\
-        <Country_Market Value=\"ZA\" />\
-        </Country_Markets>\
-        <TryCData>\
-        <![CDATA[cdata text & > hoi]]>\
-        </TryCData>\
-        </file>"
-
-sp = XmlParser(source=source)
-s = sp.search_nodes(tag='file')
-list(s)
-# c  = iterparse(sp.io_source)
-# list(c)
-# io_source = StringIO("""{}""".format(source))
-# s = iterparse(io_source)
-# list(s)
