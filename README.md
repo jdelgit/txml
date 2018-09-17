@@ -1,6 +1,6 @@
 # txml
 
-**txml** is a module to parse XML files to a dictionary-like object
+**txml** is a module to parse XML files to a json-like object
 
 ## Usage
 
@@ -8,7 +8,7 @@ Reading  and searching throug an **.xml** file or string
 Using 'sample.xml'
 
 ```python
->>> from my_xml import XmlParser
+>>> from txml import XmlParser
 >>> source = 'sample.xml'
 >>> parser = XmlParser(source=source)
 >>> products = parser.search_nodes(tag='controller')
@@ -16,7 +16,8 @@ Using 'sample.xml'
 
 The **products** object is a _generator_ of all matched instances of the tag **controller**.
 The results can only be accessed once. If the results require multiple accesses
-then the generator should be converted to a list.
+then the generator should be converted to a list. If no parameters are passed to the method,
+the entire xml-source will be returned in the
 
 
 ```python
