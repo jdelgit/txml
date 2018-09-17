@@ -6,13 +6,8 @@ import unittest
 class TestXmlParser(unittest.TestCase):
 
     def setUp(self):
-        self.vtc_parser = XmlParser(source='sample.xml')
-
-    def tearDown(self):
-        del self.vtc_parser
-
-    def test_node_to_dict(self):
-        node2dict_testdata = "<file path=\"export/level4/NL/30114.xml\" \
+        self.parser = XmlParser(source='sample.xml')
+        self.str_source = "<file path=\"export/level4/NL/30114.xml\" \
         Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
         Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
         Model_Name=\"Mibatsu Monstrosity\" Product_View=\"32767\" \
@@ -36,7 +31,33 @@ class TestXmlParser(unittest.TestCase):
         </TryCData>\
         </file>"
 
-        test_node = fromstring(node2dict_testdata)
+    def tearDown(self):
+        del self.parser
+
+    def test_source_check(self):
+        non_existant_xml = 'some_random_file.xml'
+        test_parser = XmlParser(source=non_existant_xml)
+        self.assertEqual(test_parser.proces_file, False)
+        self.assertEqual(test_parser.use_io, False)
+
+        existing_xml = 'sample.xml'
+        test_parser = XmlParser(source=existing_xml)
+        self.assertEqual(test_parser.proces_file, True)
+        self.assertEqual(test_parser.use_io, False)
+
+        bad_format_str = "Just some random string of words"
+        test_parser = XmlParser(source=bad_format_str)
+        self.assertEqual(test_parser.proces_file, False)
+        self.assertEqual(test_parser.use_io, False)
+
+        proper_format_str = self.str_source
+        test_parser = XmlParser(source=proper_format_str)
+        self.assertEqual(test_parser.proces_file, True)
+        self.assertEqual(test_parser.use_io, True)
+
+    def test_node_to_dict(self):
+
+        test_node = fromstring(self.str_source)
         my_parser = XmlParser()
         if hasattr(test_node, 'getroot'):
             test_node = test_node.getroot()
@@ -56,7 +77,7 @@ class TestXmlParser(unittest.TestCase):
         self.assertDictEqual(test_dict, control_dict)
 
     def test_search_nodes(self):
-        products = self.vtc_parser.search_nodes(tag='controller')
+        products = self.parser.search_nodes(tag='controller')
         products_list = list(products)
 
         test_num_matches = len(products_list)
@@ -83,7 +104,7 @@ class TestXmlParser(unittest.TestCase):
         self.assertEqual(test_list, control_list)
 
     def test_search_node_attr(self):
-        product = self.vtc_parser.search_node_attr(
+        product = self.parser.search_node_attr(
             tag='controller', type='usb')
         prod_list = list(product)
 
@@ -111,6 +132,25 @@ class TestXmlParser(unittest.TestCase):
                                               'text': None,
                                               'tag': 'address'}}]
         self.assertEqual(test_product_children, control_product_children)
+
+    def test_get_all_tags(self):
+
+        test_list = self.parser.get_all_tags()
+        control_list = ['sound', 'memballoon', 'pae', 'currentMemory', 'disk',
+                        'mac', 'boot', 'emulator', 'driver', 'graphics',
+                        'imagelabel', 'virtualport', 'video', 'on_crash',
+                        'resource', 'serial', 'name', 'cpu', 'feature',
+                        'alias', 'os', 'address', 'memory', 'channel',
+                        'controller', 'console', 'parameters', 'uuid',
+                        'devices', 'listen', 'domain', 'interface',
+                        'type', 'input', 'label', 'on_poweroff',
+                        'features', 'acpi', 'seclabel', 'vcpu', 'clock',
+                        'on_reboot', 'apic', 'source', 'protocol',
+                        'target', 'model', 'partition']
+        control_list.sort()
+        test_list.sort()
+
+        self.assertListEqual(test_list, control_list)
 
 
 if __name__ == '__main__':

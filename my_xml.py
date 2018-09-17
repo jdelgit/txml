@@ -1,11 +1,67 @@
-from xml.etree.ElementTree import iterparse
-# Doesn't support string inputs yet, only .xml files
+from xml.etree.ElementTree import iterparse, ParseError
+from io import StringIO
+from os.path import isfile
 
 
 class XmlParser:
 
     def __init__(self, source=""):
         self.source = source
+        self.proces_file = False
+        self.use_io = False
+        self._source_check()
+
+    def _source_check(self):
+        """
+        [Function checkes whether the source input is a existing xml file
+         or a xml syle formatted string]
+        """
+
+        _extension = self.source[-3:]
+        if _extension == "xml":
+            if isfile(self.source):
+                    self.proces_file = True
+            else:
+                print("File not found {}".format(self.source))
+        else:
+            context_test = iterparse(StringIO("""{}""".format(self.source)))
+            try:
+                context_test.__next__()
+                del context_test
+                self.proces_file = True
+                self.use_io = True
+            except ParseError:
+                del context_test
+                print("Input is not in supported Xml format")
+
+    def get_all_tags(self):
+        """[All the unique tags available in the Xml
+            No hierachy is mainted for the xml structure]
+
+        Returns:
+            [list] -- [A list of all the unique tags available in the Xml]
+        """
+
+        if self.source and self.proces_file:
+
+            if self.use_io:
+                context = iterparse(StringIO("""{}""".format(self.source)),
+                                             events=("start",))
+            else:
+                context = iterparse(self.source, events=("start",))
+        else:
+            print("No source XML-file provided")
+            return
+        tag_set = []
+        for event, elem in context:
+            tag_set.append(elem.tag)
+            elem.clear()
+
+        tag_set = list(set(tag_set))
+        return tag_set
+
+    def tree_structure(self):
+        pass
 
     def search_node_attr(self, tag="", get_children=True, **kwargs):
         """[This function filters results from the <search_node> function
@@ -58,10 +114,15 @@ class XmlParser:
             get_children {bool} -- [Choice for whether subnodes should be returnd] (default: {True})
         """
 
-        if self.source:
-            context = iterparse(self.source, events=('start', 'end'))
+        if self.source and self.proces_file:
+            if self.use_io:
+                context = iterparse(StringIO("""{}""".format(self.source)),
+                                    events=('start', 'end'))
+            else:
+                context = iterparse(self.source, events=('start', 'end'))
+
         else:
-            print("No source XML-file provided")
+            print("Unable to process input")
             return
         if get_children:
             children = []
@@ -114,7 +175,7 @@ class XmlParser:
             This is done based on the start/end triggers from the elements in the Xml format]
 
         Arguments:
-            event {[str]} -- [description]
+            event {[str]} -- [start/end points of element]
             elem {[et.etree.ElementTree.Element]} -- [description]
 
         Keyword Arguments:
@@ -205,3 +266,36 @@ class XmlParser:
         data['text'] = node.text
         data['tag'] = node.tag
         return data
+
+source = "<file path=\"export/level4/NL/30114.xml\" \
+        Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
+        Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
+        Model_Name=\"Mibatsu Monstrosity\" Product_View=\"32767\" \
+        HighPic=\"http://images.awesome.biz/img/high/30114-Mibatsu.jpg\" \
+        HighPicSize=\"20782\" HighPicWidth=\"320\" HighPicHeight=\"300\" \
+        Date_Added=\"20050715000000\">\
+        <M_Prod_ID>ACLS5<b>test</b>.CEE</M_Prod_ID>\
+        <EAN_UPCS>\
+        <EAN_UPC Value=\"4901780776467\" />\
+        <EAN_UPC Value=\"5053460903188\" />\
+        </EAN_UPCS>\
+        <Country_Markets>\
+        <Country_Market Value=\"PL\" />\
+        <Country_Market Value=\"ES\" />\
+        <Country_Market Value=\"NL\" />\
+        <Country_Market Value=\"FR\" />\
+        <Country_Market Value=\"ZA\" />\
+        </Country_Markets>\
+        <TryCData>\
+        <![CDATA[cdata text & > hoi]]>\
+        </TryCData>\
+        </file>"
+
+sp = XmlParser(source=source)
+s = sp.search_nodes(tag='file')
+list(s)
+# c  = iterparse(sp.io_source)
+# list(c)
+# io_source = StringIO("""{}""".format(source))
+# s = iterparse(io_source)
+# list(s)

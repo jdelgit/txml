@@ -4,7 +4,7 @@
 
 ## Usage
 
-Reading  and searching throug an **.xml** file
+Reading  and searching throug an **.xml** file or string
 Using 'sample.xml'
 
 ```python
@@ -35,11 +35,11 @@ Let's look at the first entry. A dictionary of the element is returned containin
  'children': [{'children': [],
                'elem': {'name': 'usb0',
                         'text': None, 'tag': 'alias'}},
-               {'children': [],
-                'elem': {'type': 'pci', 'domain': '0x0000',
-                         'bus': '0x00', 'slot': '0x01',
-                         'function': '0x2',
-                         'text': None, 'tag': 'address'}}] }
+              {'children': [],
+               'elem': {'type': 'pci', 'domain': '0x0000',
+                        'bus': '0x00', 'slot': '0x01',
+                        'function': '0x2',
+                        'text': None, 'tag': 'address'}}] }
 ```
 
 The **txml** module can also search for node which match a set of **attributes**. Any number of attributes can be passed and the function will return any node containing the matching attributes.
@@ -55,11 +55,11 @@ The **txml** module can also search for node which match a set of **attributes**
  'children': [{'children': [],
                'elem': {'name': 'usb0',
                         'text': None, 'tag': 'alias'}},
-               {'children': [],
-                'elem': {'type': 'pci', 'domain': '0x0000',
-                         'bus': '0x00', 'slot': '0x01',
-                         'function': '0x2',
-                         'text': None, 'tag': 'address'}}] }
+              {'children': [],
+               'elem': {'type': 'pci', 'domain': '0x0000',
+                        'bus': '0x00', 'slot': '0x01',
+                        'function': '0x2',
+                        'text': None, 'tag': 'address'}}] }
 ```
 
 
@@ -79,4 +79,4 @@ Clone this repo, and enjoy.
 ## To Do
 
 + Performance tests
-+ Support for string input formats
++ Support for namespaces
