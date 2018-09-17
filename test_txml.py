@@ -1,4 +1,4 @@
-from my_xml import XmlParser
+from txml import XmlParser
 from xml.etree.ElementTree import fromstring
 import unittest
 
