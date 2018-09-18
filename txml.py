@@ -1,6 +1,7 @@
 from xml.etree.ElementTree import iterparse, ParseError
 from io import StringIO
 from os.path import isfile
+import re
 
 
 class XmlParser:
@@ -9,6 +10,7 @@ class XmlParser:
         self.source = source
         self.proces_file = False
         self.use_io = False
+        self.encoding = 'UTF-8'
         self._source_check()
 
     def _source_check(self):
@@ -21,6 +23,7 @@ class XmlParser:
         if _extension == "xml":
             if isfile(self.source):
                     self.proces_file = True
+                    self._get_encoding()
             else:
                 print("File not found {}".format(self.source))
         else:
@@ -30,9 +33,19 @@ class XmlParser:
                 del context_test
                 self.proces_file = True
                 self.use_io = True
+                self._get_encoding()
             except ParseError:
                 del context_test
                 print("Input is not in supported Xml format")
+
+    def _get_encoding(self):
+        if self.proces_file and not self.use_io:
+            with open(self.source, 'r') as f:
+                l = f.readline()
+            if 'encoding' in l:
+                match = re.findall('(encoding=.*\?)', l)
+                encoding = match[0].split('=')[1].replace('?', '').replace('\"', '')
+                self.encoding = encoding
 
     def get_all_tags(self):
         """[All the unique tags available in the Xml
@@ -46,9 +59,10 @@ class XmlParser:
 
             if self.use_io:
                 context = iterparse(StringIO("""{}""".format(self.source)),
-                                             events=("start",))
+                                    events=("start",))
             else:
-                context = iterparse(self.source, events=("start",))
+                data = open(self.source, 'r', encoding=self.encoding)
+                context = iterparse(data, events=("start",))
         else:
             print("No source XML-file provided")
             return
@@ -56,12 +70,10 @@ class XmlParser:
         for event, elem in context:
             tag_set.append(elem.tag)
             elem.clear()
-
+        data.close()
+        del context
         tag_set = list(set(tag_set))
         return tag_set
-
-    def tree_structure(self):
-        pass
 
     def search_node_attr(self, tag="", get_children=True, **kwargs):
         """[This function filters results from the <search_node> function
@@ -69,8 +81,8 @@ class XmlParser:
 
         Keyword Arguments:
             tag {str} -- [tag of Xml node element] (default: {""})
-            get_children {bool} -- [Choice for whether
-                                    subnodes should be returned] (default: {True})
+            get_children {bool} -- [Choice for whether subnodes
+                                    should be returned] (default: {True})
 
         Returns / yields:
             [dict] -- [Dictionary containing all matching nodes]
@@ -104,14 +116,16 @@ class XmlParser:
                 yield node
 
     def search_nodes(self, tag="", get_children=True):
-        """[If a tag is specified the function returns an generator with all Xml elements
-            which have a matching tag. If tag is not specified, the root node is returned
+        """[If a tag is specified the function returns an generator
+            with all Xml elements which have a matching tag.
+            If tag is not specified, the root node is returned
             When get_children is set, the function returns the subnodes
             nested in a list of dictionaries]
 
         Keyword Arguments:
             tag {str} -- [tag of Xml node element] (default: {""})
-            get_children {bool} -- [Choice for whether subnodes should be returnd] (default: {True})
+            get_children {bool} -- [Choice for whether subnodes
+                                    should be returned] (default: {True})
         """
 
         if self.source and self.proces_file:
@@ -119,7 +133,8 @@ class XmlParser:
                 context = iterparse(StringIO("""{}""".format(self.source)),
                                     events=('start', 'end'))
             else:
-                context = iterparse(self.source, events=('start', 'end'))
+                data = open(self.source, 'r', encoding=self.encoding)
+                context = iterparse(data, events=('start', 'end'))
 
         else:
             print("Unable to process input")
@@ -167,6 +182,8 @@ class XmlParser:
                 yield output_dict
 
         del context
+        data.close()
+        del data
 
     def _stack_state_controller(self, event, elem, p_tag="", c_tag="",
                                 p_stack=[], tag_stack=[], children=[],

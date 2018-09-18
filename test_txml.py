@@ -7,6 +7,7 @@ class TestXmlParser(unittest.TestCase):
 
     def setUp(self):
         self.parser = XmlParser(source='sample.xml')
+
         self.str_source = "<file path=\"export/level4/NL/30114.xml\" \
         Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
         Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
@@ -33,6 +34,16 @@ class TestXmlParser(unittest.TestCase):
 
     def tearDown(self):
         del self.parser
+
+    def test_get_encoding(self):
+        self.encoded_parser = XmlParser(source='jan96down.xml')
+        control_encoding = 'iso-8859-1'
+        test_encoding = self.encoded_parser.encoding
+        self.assertEqual(test_encoding, control_encoding)
+
+        control_encoding = 'UTF-8'
+        test_encoding = self.parser.encoding
+        self.assertEqual(test_encoding, control_encoding)
 
     def test_source_check(self):
         non_existant_xml = 'some_random_file.xml'
