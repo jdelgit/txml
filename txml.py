@@ -1,7 +1,7 @@
 from xml.etree.ElementTree import iterparse, ParseError
 from io import StringIO
 from os.path import isfile
-import re
+from re import findall
 
 
 class XmlParser:
@@ -11,8 +11,11 @@ class XmlParser:
         self.proces_file = False
         self.use_io = False
         self.encoding = 'UTF-8'
+        self.namespaces = {}
+        self.namespace_present = False
         self._source_check()
 
+    # see also _get_encoding, _get_namespaces
     def _source_check(self):
         """
         [Function checkes whether the source input is a existing xml file
@@ -22,8 +25,9 @@ class XmlParser:
         _extension = self.source[-3:]
         if _extension == "xml":
             if isfile(self.source):
-                    self.proces_file = True
-                    self._get_encoding()
+                self.proces_file = True
+                self._get_encoding()
+                self._get_namespaces()
             else:
                 print("File not found {}".format(self.source))
         else:
@@ -34,6 +38,7 @@ class XmlParser:
                 self.proces_file = True
                 self.use_io = True
                 self._get_encoding()
+                self._get_namespaces()
             except ParseError:
                 del context_test
                 print("Input is not in supported Xml format")
@@ -43,9 +48,35 @@ class XmlParser:
             with open(self.source, 'r') as f:
                 l = f.readline()
             if 'encoding' in l:
-                match = re.findall('(encoding=.*\?)', l)
-                encoding = match[0].split('=')[1].replace('?', '').replace('\"', '')
+                match = findall('(encoding=.*\?)', l)
+                encoding = match[0].split('=')[1].replace(
+                    '?', '').replace('\"', '')
                 self.encoding = encoding
+
+    # see also get_all_tags
+    def _get_namespaces(self):
+        """[Creates a dictionary of the namespaces with their associated tags ]
+
+        Returns:
+            [dict] -- [Dictionary with namespaces as keys
+                       and the corresponding tags in a list as value ]
+        """
+
+        tags = self.get_all_tags()
+        namespaces = {}
+        for tag in tags:
+            namespace = findall('({.{1,}})', tag)
+            if len(namespace) > 0:
+                namespace = namespace[0]
+                formatted_tag = tag.replace(namespace, '')
+                try:
+                    namespaces[namespace].append(formatted_tag)
+                except KeyError:
+                    namespaces[namespace] = [formatted_tag]
+        if namespaces:
+            self.namespace_present = True
+        self.namespaces = namespaces
+        # return namespaces
 
     def get_all_tags(self):
         """[All the unique tags available in the Xml
@@ -70,11 +101,25 @@ class XmlParser:
         for event, elem in context:
             tag_set.append(elem.tag)
             elem.clear()
-        data.close()
+        if self.source and self.proces_file and not self.use_io:
+            data.close()  # close filestream
         del context
         tag_set = list(set(tag_set))
         return tag_set
 
+    # see also search_nodes
+    def search_namespace_node(self, namespace="", tag=""):
+        ntag = "{}{}".format(namespace, tag)
+        for node in self.search_nodes(tag=ntag):
+            yield node
+
+    # see also search_node_attr
+    def search_namespace_attr(self, namespace="", tag="", **kwargs):
+        ntag = "{}{}".format(namespace, tag)
+        for node in self.search_node_attr(tag=ntag, kwargs=kwargs):
+            yield node
+
+    # see also seach_nodes
     def search_node_attr(self, tag="", get_children=True, **kwargs):
         """[This function filters results from the <search_node> function
             based on given attributes,values]
@@ -115,6 +160,7 @@ class XmlParser:
             if give_node:
                 yield node
 
+    # see also _node_to_dict and _stack_state_controller
     def search_nodes(self, tag="", get_children=True):
         """[If a tag is specified the function returns an generator
             with all Xml elements which have a matching tag.
@@ -182,9 +228,11 @@ class XmlParser:
                 yield output_dict
 
         del context
-        data.close()
+        if self.source and self.proces_file and not self.use_io:
+            data.close()  # close filestream
         del data
 
+    # see also node_to_dict
     def _stack_state_controller(self, event, elem, p_tag="", c_tag="",
                                 p_stack=[], tag_stack=[], children=[],
                                 npd=False):

@@ -7,7 +7,6 @@ class TestXmlParser(unittest.TestCase):
 
     def setUp(self):
         self.parser = XmlParser(source='sample.xml')
-
         self.str_source = "<file path=\"export/level4/NL/30114.xml\" \
         Product_ID=\"30114\" Updated=\"20150301102709\" Quality=\"AWESOME\" \
         Supplier_id=\"5\" Prod_ID=\"FLY-734CU\" Catid=\"587\" On_Market=\"1\" \
@@ -85,6 +84,23 @@ class TestXmlParser(unittest.TestCase):
                         'HighPicHeight': '300', 'Date_Added': '20050715000000',
                         'text': '        ',
                         'tag': "file"}
+        self.assertDictEqual(test_dict, control_dict)
+
+    def test_get_namespaces(self):
+        encoded_parser = XmlParser(source='jan96down.xml')
+        # encoded_parser._get_namespaces()
+        test_dict = encoded_parser.namespaces
+        t_key = list(test_dict.keys())[0]
+        ts_list = test_dict[t_key]
+        ts_list.sort()
+        test_dict = {t_key: ts_list}
+        control_list = ['Application', 'ParaCurve', 'Metric', 'Start',
+                        'Cant', 'Feature', 'Curve', 'CoordGeom',
+                        'Alignments', 'Property', 'LandXML', 'CantStation',
+                        'Profile', 'End', 'Center', 'Project', 'PVI', 'Units',
+                        'Spiral', 'ProfAlign', 'Alignment', 'PI', 'Line']
+        control_list.sort()
+        control_dict = {'{http://www.landxml.org/schema/LandXML-1.1}': control_list}
         self.assertDictEqual(test_dict, control_dict)
 
     def test_search_nodes(self):
