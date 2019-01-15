@@ -331,3 +331,136 @@ class XmlParser:
         data['text'] = node.text
         data['tag'] = node.tag
         return data
+
+
+class XsdtoDict:
+
+    def __init__(self, source=''):
+        self.source = source
+
+    def convert_to_dict(self):
+        parser = XmlParser(source=self.source)
+        xsd_tags = self.get_export_type_data(parser)
+        data = {}
+        for tag in xsd_tags:
+            data[tag['name']] = self.parse_xml_entry(tag, parser)
+        return data
+
+    def get_export_type_data(self, validation_parser):
+
+        all_nodes = validation_parser.search_nodes()
+        output_types = []
+        for nodes in all_nodes:
+            if nodes:
+                output_types = [{'name': entry['element']['attr']['name'],
+                                'tag': entry['element']['tag']}
+                                for entry in nodes['children']]
+        return output_types
+
+    def parse_xml_entry(self, tag_data, xml_iterator):
+        parent_tag = tag_data['tag']
+        parent_name = tag_data['name']
+
+        sub_elements = xml_iterator.search_node_attr(tag=parent_tag,
+                                                     name=parent_name)
+        if 'complexType' in parent_tag:
+            output = self.parse_complextypes(sub_elements)
+        elif 'simpleType' in parent_tag:
+            output = self.parse_simpletypes(sub_elements)
+        else:
+            output = list(sub_elements)
+        return output
+
+    def parse_complextypes(self, complex_iterator):
+
+        output = {}
+        for element_data in complex_iterator:
+            output['attr'] = element_data['element']['attr']
+            output['sequence'] = []
+            if element_data['children']:
+                for sub_element in element_data['children']:
+                    if 'sequence' in sub_element['element']['tag']:
+                        sequence_data = self.parse_sequence(sub_element['children'])
+                        output['sequence'].append(sequence_data)
+                    else:
+                        pass
+
+        return output
+
+    def parse_sequence(self, sequence_elements):
+
+        sequence_output = []
+        for element in sequence_elements:
+            element_data = self.parse_element(element)
+            sequence_output.append(element_data)
+        return sequence_output
+
+    def parse_element(self, element):
+        output = {}
+
+        if 'children' in element:
+            output['tag'] = element['element']['tag']
+            output['attr'] = element['element']['attr']
+            element_children = element['children']
+            output['children_data'] = []
+            for child in element_children:
+                if 'simpleType' in child['element']['tag']:
+                    child_data = self.parse_simpletypes(child)
+                    output['children_data'].append(child_data)
+        else:
+            output['tag'] = element['tag']
+            output['attr'] = element['attr']
+        return output
+
+    def parse_simpletypes(self, simple_element):
+
+        output = {}
+        try:
+            element_children = simple_element['children']
+            for child_element in element_children:
+                if 'restriction' in child_element['element']['tag']:
+                    output['restrictions'] = {'attr': child_element['element']['attr']}
+                    restriction_data = self.parse_restrictions(child_element['children'])
+                    output['restrictions']['restrictions'] = restriction_data
+        except TypeError:
+            tes = list(simple_element)
+            for data in simple_element:
+                output['attr'] = data['attr']
+
+        return output
+
+    def parse_restrictions(self, restriction_iterator):
+
+        output = []
+        for restriction in restriction_iterator:
+            restriction_data = {}
+            restriction_data['enumarations'] = []
+            restriction_data['length_data'] = []
+            if 'element' in restriction:
+                if 'enumeration' in restriction['element']['tag']:
+                    enumaration_data = self.parse_enumarations(restriction['children'])
+                    restriction_data['enumarations'].append(enumaration_data)
+                    restriction_data['attr'] = restriction['element']['attr']
+                elif 'Length' in restriction['element']['tag']:
+                    restriction_data['attr'] = restriction['element']['attr']
+                    restriction_data['length_data'].append(restriction['element']['attr'])
+            else:
+                restriction_data['attr'] = restriction['attr']
+
+            output.append(restriction_data)
+
+        return output
+
+    def parse_enumarations(self, enumeration_iterator):
+
+        output = {'annotations': ""}
+        for enumaration in enumeration_iterator:
+            if 'annotation' in enumaration['element']['tag']:
+                annotations = enumaration['children']
+                annot = {'documentation': []}
+                for annotation in annotations:
+                    annot['documentation'].append({'attr': annotation['attr'],
+                                                   'text': ['text']})
+
+                output['annotations'] = annot
+        return output

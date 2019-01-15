@@ -30,17 +30,23 @@ Let's look at the first entry. A dictionary of the element is returned containin
 
 ```python
 >>> product_list[0]
-{'elem': {'type': 'usb', 'index': '0',
-          'text': '\n            ',
-          'tag': 'controller'}
+{'element': {'attr': {
+                      'type': 'usb',
+                      'index': '0'},
+             'text': '\n            ',
+             'tag': 'controller'}
  'children': [{'children': [],
-               'elem': {'name': 'usb0',
-                        'text': None, 'tag': 'alias'}},
+               'element': {
+                            'attr': {'name': 'usb0'},
+                            'text': None,
+                            'tag': 'alias'}},
               {'children': [],
-               'elem': {'type': 'pci', 'domain': '0x0000',
-                        'bus': '0x00', 'slot': '0x01',
-                        'function': '0x2',
-                        'text': None, 'tag': 'address'}}] }
+               'element': {
+                        'attr': {'type': 'pci', 'domain': '0x0000',
+                                 'bus': '0x00', 'slot': '0x01',
+                                 'function': '0x2'},
+                        'text': None,
+                        'tag': 'address'}}] }
 ```
 
 The **txml** module can also search for node which match a set of **attributes**. Any number of attributes can be passed and the function will return any node containing the matching attributes.
@@ -54,13 +60,16 @@ The **txml** module can also search for node which match a set of **attributes**
           'text': '\n            ',
           'tag': 'controller'}
  'children': [{'children': [],
-               'elem': {'name': 'usb0',
+               'elem': {
+                        'attr' : {'name': 'usb0'},
                         'text': None, 'tag': 'alias'}},
               {'children': [],
-               'elem': {'type': 'pci', 'domain': '0x0000',
-                        'bus': '0x00', 'slot': '0x01',
-                        'function': '0x2',
-                        'text': None, 'tag': 'address'}}] }
+               'elem': {'attr' {
+                                'type': 'pci', 'domain': '0x0000',
+                                'bus': '0x00', 'slot': '0x01',
+                                'function': '0x2'},
+                        'text': None,
+                        'tag': 'address'}}] }
 ```
 
 
