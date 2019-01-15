@@ -23,7 +23,7 @@ class XmlParser:
         """
 
         _extension = self.source[-3:]
-        if _extension == "xml":
+        if _extension == "xml" or _extension == "xsd":
             if isfile(self.source):
                 self.proces_file = True
                 self._get_encoding()
@@ -141,12 +141,12 @@ class XmlParser:
                     arg = kwargs[key]
 
                     try:
-                        node_val = node['elem'][key]
+                        node_val = node['element']['attr'][key]
                     except KeyError:
-                        print("Key '{}' not found in element {}".format(key,
-                                                                        tag))
+                        # print("Key '{}' not found in element {}".format(key,
+                        #                                                 tag))
                         # exit function if non-existing key is requested
-                        return {}
+                        node_val = ''
 
                     if node_val == arg:
                         give_node = True
@@ -195,7 +195,7 @@ class XmlParser:
         append_children = False
         for event, elem in context:
             if not tag:
-                # if no tag is given then get data nor entire document
+                # if no tag is given then get data for entire document
                 tag = elem.tag
 
             if get_children:
@@ -217,7 +217,7 @@ class XmlParser:
             if elem.tag == tag and event == 'end':
 
                 node_dict = self._node_to_dict(elem)
-                output_dict = {'elem': node_dict, 'children': []}
+                output_dict = {'element': node_dict, 'children': []}
                 elem.clear()
 
                 if get_children:
@@ -260,7 +260,7 @@ class XmlParser:
             tag_stack.append(elem.tag)
             if npd:
                 # add new dictionary when children are confiremed to exist
-                _p_dict = {'children': [], 'elem': ""}
+                _p_dict = {'children': [], 'element': ""}
                 p_stack.append(_p_dict)
             p_tag = c_tag
             c_tag = elem.tag
@@ -273,11 +273,11 @@ class XmlParser:
                 if len(p_stack) > 0:
                     # child has children
                     _child = p_stack.pop()
-                    _child['elem'] = self._node_to_dict(elem)
+                    _child['element'] = self._node_to_dict(elem)
 
                 else:
                     _child = {'children': [],
-                              'elem': self._node_to_dict(elem)}
+                              'element': self._node_to_dict(elem)}
                 children.append(_child)
                 c_tag = ""
                 tag_stack.pop()
@@ -286,7 +286,7 @@ class XmlParser:
 
                 _child = p_stack.pop()
                 _parent = p_stack.pop()
-                _child['elem'] = self._node_to_dict(elem)
+                _child['element'] = self._node_to_dict(elem)
                 _parent['children'].append(_child)
                 p_stack.append(_parent)
 
@@ -326,8 +326,8 @@ class XmlParser:
             [dict] -- [Dictionary containing all the attribute,value pairs
                        contained in the node]
         """
-
-        data = {n[0]: n[1] for n in node.items()}
+        data = {}
+        data['attr'] = {n[0]: n[1] for n in node.items()}
         data['text'] = node.text
         data['tag'] = node.tag
         return data
