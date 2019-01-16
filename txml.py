@@ -423,10 +423,20 @@ class XsdtoDict:
                     restriction_data = self.parse_restrictions(child_element['children'])
                     output['restrictions']['restrictions'] = restriction_data
         except TypeError:
-            tes = list(simple_element)
-            for data in simple_element:
-                output['attr'] = data['attr']
+            element_data = list(simple_element)
+            element_data = element_data[0]
+            element_children = element_data['children']
+            element_children = element_children[0]['children']
 
+            output['restrictions'] = []
+            for data in element_children:
+                if 'element' in data:
+                    output['restrictions'].append(data['element']['attr']) 
+                else:
+                     if 'minLength' in data['tag']:
+                         output['restrictions'].append({'minlength':data['attr']})
+                     if 'maxLength' in data['tag']:
+                         output['restrictions'].append({'maxlength':data['attr']})
         return output
 
     def parse_restrictions(self, restriction_iterator):
